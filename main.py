@@ -3,8 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 
-
-from .api.controller.api_router import api_router
+from src.api.controller.api_router import api_router
 from config import settings as cf
 
 def create_app() -> FastAPI:
