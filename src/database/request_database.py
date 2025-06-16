@@ -8,14 +8,11 @@ from fastapi import HTTPException
 def create_request(request: RequestSave):
 
     request = super_client.table("request").insert({
-        "id": (int(super_client.from("request").select('*', {
-            count: 'exact' }).count) + 1),
         "start_date": datetime.datetime.now(),
         "end_date": request.end_date,
         "file": request.file,
         "category_id": request.category_id,
         "user_id": auth_service.get_user_id(),
-        "state_id": 1
     }).execute()
 
 def get_request_from_date_intervals(from_date: datetime, until_date: datetime):
