@@ -16,8 +16,12 @@ def create_request(request: RequestSave):
     }).execute()
 
 def get_request_from_date_intervals(from_date: datetime, until_date: datetime):
-    request = super_client.table("request").select("start_date")
-        .range_gte("start_date", [from_date, until_date]).execute()
+    request = (super_client
+               .table("request")
+               .select("start_date")
+               .range_gte("start_date", [from_date, until_date])
+               .execute()
+               )
 
     if request.data:
         return request.data
