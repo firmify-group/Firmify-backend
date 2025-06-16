@@ -1,6 +1,13 @@
 from pydantic import BaseModel
+import datetime
+
+class RequestDataOut(BaseModel):
+    id: int
+    category: str
+    state: str
 
 class RequestOut(BaseModel):
-    id: int
-    category_name: str
-    state_name: str
+    status: bool
+    timestamp: datetime
+    message: str
+    data: RequestDataOut[]
