@@ -95,6 +95,7 @@ async def register(
     return {"message": "Registration successful", "user": newUser}
 
 
+
 @router.get("/test")
 async def test():
     """
@@ -115,11 +116,20 @@ async def test():
     print("-------------------------------------")
     print("sesion", super_client.auth.get_session())
     """
+
+    data = [{},{}]
     response = super_client.table("request").select("*").execute().data
 
+    print("Response from request table:", response)
 
+    data[0] = response
     
-    return {"message": "Test successful", "data": response}
+    sesion = super_client.auth.get_session()
+    print("Session data:", sesion)
+    
+    #data[1] = sesion
+    
+    return {"message": "Test successful", "data": data}
 
 
 @router.post("/logout")
