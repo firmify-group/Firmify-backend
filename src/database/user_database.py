@@ -21,6 +21,7 @@ def create_employee(employee: UserSave):
         "rut": employee.rut,
         "name": employee.full_name,
         "email": auth_user.user.user_metadata["email"],
+        "password": employee.password,
         "signature": employee.signature,
         "rol_id": 1
     }).execute()
