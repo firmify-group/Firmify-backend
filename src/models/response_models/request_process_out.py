@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 import datetime
 
-class ProcessDataOut(BaseModel):
+class RequestProcessDataOut(BaseModel):
     id: int
     rut: str
     email: str
@@ -11,8 +11,8 @@ class ProcessDataOut(BaseModel):
     start_date: datetime
     end_date: datetime
     
-class ProcessOut(BaseModel):
+class RequestProcessOut(BaseModel):
     status: bool
     timestamp: datetime
     message: str
-    data: ProcessDataOut[]
+    data: RequestProcessDataOut[]

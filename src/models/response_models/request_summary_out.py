@@ -7,16 +7,16 @@ class RequestSummary(BaseModel):
     totalObjeciones: int
     totalProcesos: int
 
-class CategorySummary(BaseModel):
+class RequestCategorySummary(BaseModel):
     name: str
     total: int
 
-class SummaryDataOut(BaseModel):
+class RequestSummaryDataOut(BaseModel):
     request: RequestSummary
-    categorySummaries: CategorySummary[]
+    categorySummaries: RequestCategorySummary[]
 
-class SummaryOut(BaseModel):
+class RequestSummaryOut(BaseModel):
     status: bool
     timestamp: datetime
     message: str
-    data: SummaryDataOut
+    data: RequestSummaryDataOut
