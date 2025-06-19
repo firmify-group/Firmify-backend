@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 import os
 from dotenv import load_dotenv
 
@@ -10,7 +12,7 @@ class Settings():
     SUPABASE_SERVICE_KEY: str = os.getenv("SUPABASE_SERVICE_KEY")
     TOKEN_EXPIRY = os.getenv("TOKEN_EXPIRY")
     JWT_SECRET_KEY = os.getenv("JWT_SECRET")
-
+    JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
     PROJECT_NAME: str = "FirmiFy"
 
     # Agregar el dominio del frontend
