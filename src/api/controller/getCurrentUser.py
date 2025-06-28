@@ -1,7 +1,5 @@
-from typing import Optional
-from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
-from fastapi import Depends, Request, HTTPException, status
+from fastapi import Request, HTTPException, status
 from config import settings
 
 def get_current_user(request: Request):
