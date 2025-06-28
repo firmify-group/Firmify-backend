@@ -27,4 +27,3 @@ def createToken(data: token.JWTToken, expires_in: int = 3600):
     #payload["exp"] = datetime.now() + timedelta(seconds=expires_in)
     token_jwt = jwt.encode(payload, cf.JWT_SECRET_KEY, algorithm="HS256")
     return token_jwt
-
