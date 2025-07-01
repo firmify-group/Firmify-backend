@@ -23,7 +23,7 @@ def create_employee(employee: UserSave):
         "email": auth_user.user.user_metadata["email"],
         "password": employee.password,
         "signature": employee.signature,
-        "rol_id": 1
+        "rol_id": 2
     }).execute()
 
     print("Employee created:", employee.data)
