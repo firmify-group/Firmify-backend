@@ -13,7 +13,7 @@ class RequestCategorySummary(BaseModel):
 
 class RequestSummaryDataOut(BaseModel):
     request: RequestSummary
-    categorySummaries: RequestCategorySummary[]
+    categorySummaries: List[RequestCategorySummary]
 
 class RequestSummaryOut(BaseModel):
     status: bool

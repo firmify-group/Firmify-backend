@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+import datetime
 
 class UserListDataOut(BaseModel):
     id: int

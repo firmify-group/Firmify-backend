@@ -23,8 +23,9 @@ from src.models.response_models.categories_out import CategoryData, CategoryResp
 from src.models.request_models.requests_in import ObjectRequestIn
 from src.models.response_models.requests_out import (
     GetAllRequestsOut, GetRequestsOut, ObjectRequestOut, RequestsData, RequestsOut, adminRequestOut)
-from src.service.requests_service import get_all_employee 
+from src.service.requests_service import (get_all_employee, get_request_summary) 
 from src.models.response_models import user_list_out
+from src.models.response_models import request_summary_out
 from src.utils.getCurrentUser import get_current_user
 from src.utils.serialize import serialize_process
 from src.database.request_database import (
@@ -204,8 +205,19 @@ async def get_categories(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 # Obtener resumen de procesos
-@requests_router.get("/api/manager/process/summary")
+@requests_router.get("/api/manager/process/summary", response_model=RequestSummaryOut)
+async def get_requests_summary(current_user: dict = Depends(get_current_user))
+    try:
+        if current_user.get("role") not in ["SUPERVISOR", "USER"]:
+            raise HTTPException(status_code=403, detail="Acceso no autorizado")
 
+    return get_request_summary()
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("Error en get_categories endpoint:", e)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 # Obtener todos los funcionarios
 @requests_router.get("/api/manager/officer/all", response_model=UserListOut)

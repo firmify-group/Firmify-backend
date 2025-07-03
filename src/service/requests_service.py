@@ -4,6 +4,7 @@ from src.models.response_models.requests_out import GetRequestsOut, RequestItem,
 from datetime import datetime
 from typing import Optional
 from src.models.response_models import user_list_out
+from src.models.response_models import request_summary_out
 
 def get_current_timestamp() -> str:
     return datetime.now().isoformat()
@@ -107,3 +108,37 @@ async def get_all_employee() -> UserListOut:
         )
 
     return UserListOut(status=true,message="Solicitud aceptada",timestamp=get_current_timestamp(),data=result)
+
+async def get_request_summary() -> RequestSummaryOut:
+    raw_data = request_database.get_all_request()
+    categories = request_database.get_categories_from_db()
+    result = []
+    totalRes = 0
+    totalPen = 0
+    totalObj = 0
+    totalPro = 0
+    if not raw_data:
+        return RequestSummaryOut(status=false,message="Error en resolver la solicitud",timestamp=get_current_timestamp(),data = [])
+
+    for item in raw_data:
+        totalProcesos+=1
+        if(item.get("state_id") == 0):    
+            totalResueltos+=1
+        else if(item.get("state_id") == 1):
+            totalPendientes+=1
+        else if(item.get("state_id") == 2):
+            totalObjetados+=1
+
+    for category in categories:
+        category_name = category.get("name")
+        count_total = 0
+        for item in raw_data:
+            if(item.get("category_id") == category.get("id")):
+                count_total+=1
+        result.append(RequestCategorySummary(name=category_name,total=count_total))
+        
+    request_summary = RequestSummary(totalResueltos=totalRes,totalPendientes=totalPen,totalObjeciones=totalObj,totalProcesos=totalPro)
+    
+    data_final = ResultSummaryDataOut(request=request_summary,categorySummaries=result)
+
+    return RequestSummaryOut(status=true,message="Solicitud aceptada",timestamp=get_current_timestamp(),data = data_final)
