@@ -1,7 +1,9 @@
 from ..database import request_database
+from ..database import user_database
 from src.models.response_models.requests_out import GetRequestsOut, RequestItem,ObjectRequestOut
 from datetime import datetime
 from typing import Optional
+from src.models.response_models import user_list_out
 
 def get_current_timestamp() -> str:
     return datetime.now().isoformat()
@@ -89,3 +91,19 @@ async def evaluate_request(request_id: int, new_status: str) -> ObjectRequestOut
         return ObjectRequestOut(message="No se pudo actualizar el estado")
 
     return ObjectRequestOut(message="Estado actualizado correctamente")
+
+async def get_all_employee() -> UserListOut:
+    raw_data = user_database.get_all_employee()
+    result = []
+    if not raw_data:
+        return UserListOut(status=false,message="Error en resolver la solicitud",timestamp=get_current_timestamp(),data = [])
+
+    for item in raw_data:
+        result.append(UserListDataOut(id=item.get("id"),
+            name=item.get("name"),
+            rut=item.get("rut"),
+            email=item.get("email")
+            )
+        )
+
+    return UserListOut(status=true,message="Solicitud aceptada",timestamp=get_current_timestamp(),data=result)

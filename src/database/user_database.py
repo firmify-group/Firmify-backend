@@ -1,8 +1,5 @@
 from ..database.deps import super_client
 from ..models.request_models.user_in import UserRequest, UserSave
-
-
-
 from fastapi import HTTPException
 
 def create_employee(employee: UserSave):
@@ -34,6 +31,14 @@ def get_employee_by_email(email: str):
     
     if employee.data:
         return employee.data[0]
+    else:
+        return None
+
+def get_all_employee():
+    employees = super_client.table("user").select("*").execute()
+
+    if employee.data:
+        return employee.data
     else:
         return None
     

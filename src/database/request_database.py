@@ -287,4 +287,3 @@ def get_categories_from_db() -> List[dict]:
         print(f"Error en get_categories_from_db: {e}")
         return []
 
-

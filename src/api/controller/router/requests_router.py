@@ -17,13 +17,14 @@ from fastapi import (
 
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
-
 from config import settings
 from src.models.request_models.request_in import RequestSave
 from src.models.response_models.categories_out import CategoryData, CategoryResponse
 from src.models.request_models.requests_in import ObjectRequestIn
 from src.models.response_models.requests_out import (
     GetAllRequestsOut, GetRequestsOut, ObjectRequestOut, RequestsData, RequestsOut, adminRequestOut)
+from src.service.requests_service import get_all_employee 
+from src.models.response_models import user_list_out
 from src.utils.getCurrentUser import get_current_user
 from src.utils.serialize import serialize_process
 from src.database.request_database import (
@@ -201,3 +202,23 @@ async def get_categories(current_user: dict = Depends(get_current_user)):
     except Exception as e:
         print("Error en get_categories endpoint:", e)
         raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+# Obtener resumen de procesos
+@requests_router.get("/api/manager/process/summary")
+
+
+# Obtener todos los funcionarios
+@requests_router.get("/api/manager/officer/all", response_model=UserListOut)
+async def get_all_employees(current_user: dict = Depends(get_current_user))
+    try:
+        if current_user.get("role") not in ["SUPERVISOR", "USER"]:
+            raise HTTPException(status_code=403, detail="Acceso no autorizado")
+
+    return get_all_employee()
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("Error en get_categories endpoint:", e)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
