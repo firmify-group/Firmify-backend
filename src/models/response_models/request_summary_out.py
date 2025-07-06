@@ -1,5 +1,7 @@
+from typing import List
 from pydantic import BaseModel
-import datetime
+from datetime import datetime
+
 
 class RequestSummary(BaseModel):
     totalResueltos: int
@@ -13,7 +15,7 @@ class RequestCategorySummary(BaseModel):
 
 class RequestSummaryDataOut(BaseModel):
     request: RequestSummary
-    categorySummaries: RequestCategorySummary[]
+    categorySumers: List[RequestCategorySummary]
 
 class RequestSummaryOut(BaseModel):
     status: bool

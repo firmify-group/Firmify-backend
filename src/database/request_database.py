@@ -4,7 +4,7 @@ from ..models.request_models.request_in import RequestSave
 from ..service import auth_service
 from src.models.response_models.requests_out import adminRequestOut
 from fastapi import HTTPException
-from datetime import datetime
+from datetime import date, datetime
 from typing import List, Optional
 from datetime import datetime, timezone
 from uuid import uuid4
@@ -56,30 +56,6 @@ def create_request_with_upload(request_file, filename, content_type):
         print(f"Error desconocido: {e}")
 
     return None
-
-
-# # Crear solicitud con archivo
-# def create_request_with_upload(request_file, filename, content_type):
-#     try:
-#         # Generar un nombre único para el archivo
-#         unique_filename = f"{uuid4()}_{filename}"
-#         bucket_name = "solicitudes"
-
-#         # Subir archivo binario directamente
-#         upload_response = super_client.storage.from_(bucket_name).upload(
-#             unique_filename,
-#             request_file,
-#             file_options={"content_type": content_type}
-#         )
-#         print("Upload response:", upload_response)
-
-#         # Verificar si hubo un error al subir el archivo
-#         if upload_response["error"]:
-#             print("Error al subir el archivo:", upload_response["error"])
-#             raise Exception(upload_response["error"]["message"])
-#     except Exception as e:
-#         print(f"Error al crear solicitud: {e}")
-#         return None
 
 
 # Crear solicitud
@@ -155,8 +131,8 @@ def get_all_request():
         return None
 
 
-# Obtener todas las solicitudes (versión administrador)
-async def get_all_requests_admin() -> list[adminRequestOut]:
+# Obtener todas las solicitudes Admin
+async def get_all_requests_admin() -> List[adminRequestOut]:
     try:
         response = (
             super_client
@@ -183,8 +159,25 @@ async def get_all_requests_admin() -> list[adminRequestOut]:
             start_date_raw = item.get("start_date")
             end_date_raw = item.get("end_date")
 
-            start_date = datetime.fromisoformat(start_date_raw).date() if isinstance(start_date_raw, str) else start_date_raw
-            end_date = datetime.fromisoformat(end_date_raw).date() if isinstance(end_date_raw, str) else end_date_raw
+            if isinstance(start_date_raw, str):
+                try:
+                    start_date = datetime.fromisoformat(start_date_raw).date()
+                except Exception:
+                    start_date = None
+            elif isinstance(start_date_raw, date):
+                start_date = start_date_raw
+            else:
+                start_date = None
+
+            if isinstance(end_date_raw, str):
+                try:
+                    end_date = datetime.fromisoformat(end_date_raw).date()
+                except Exception:
+                    end_date = None
+            elif isinstance(end_date_raw, date):
+                end_date = end_date_raw
+            else:
+                end_date = None
 
             result.append(adminRequestOut(
                 id=item.get("id"),

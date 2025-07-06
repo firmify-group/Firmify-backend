@@ -15,16 +15,18 @@ from fastapi import (
     status,
 )
 
+from fastapi.encoders import jsonable_encoder
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from config import settings
+from src.models.response_models.request_summary_out import RequestSummaryOut
 from src.models.request_models.request_in import RequestSave
 from src.models.response_models.categories_out import CategoryData, CategoryResponse
+from src.models.response_models.user_list_out import UserListOut
 from src.models.request_models.requests_in import ObjectRequestIn
 from src.models.response_models.requests_out import (
     GetAllRequestsOut, GetRequestsOut, ObjectRequestOut, RequestsData, RequestsOut, adminRequestOut)
-from src.service.requests_service import get_all_employee 
-from src.models.response_models import user_list_out
+from src.service.requests_service import get_all_employees_from_db, get_request_summary 
 from src.utils.getCurrentUser import get_current_user
 from src.utils.serialize import serialize_process
 from src.database.request_database import (
@@ -135,24 +137,44 @@ async def get_all_requests(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 
-#WebSocket para obtener solicitudes (cada 5 segundos)
+#WebSocket para obtener solicitudes (cada 10 segundos)
 @requests_router.websocket("/ws/manager/process")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     try:
         while True:
             processes = await get_all_requests_admin()
-            await websocket.send_json({
-                "processes": [serialize_process(p) for p in processes]
-            })
-            await asyncio.sleep(5)
+            processes_serializable = []
+            for p in processes:
+                d = p.dict()
+                if d.get("start_date"):
+                    d["start_date"] = d["start_date"].isoformat()
+                if d.get("end_date"):
+                    d["end_date"] = d["end_date"].isoformat()
+                processes_serializable.append(d)
+
+            data_to_send = {
+                "status": True,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "message": "Procesos obtenidos correctamente",
+                "data": {
+                    "processes": processes_serializable
+                }
+            }
+
+            print("Enviando por WS:", data_to_send) 
+
+            await websocket.send_json(data_to_send)
+            await asyncio.sleep(10)
+
     except WebSocketDisconnect:
-        pass
-    except Exception:
-        pass
+        print("WebSocket desconectado")
+    except Exception as e:
+        print(f"Error en WebSocket: {e}")
 
 
-        
+
+#obtener todas las solicitudes del usuario actual        
 @requests_router.get("/api/office/request/all", response_model=GetAllRequestsOut)
 async def fetch_requests(current_user: dict = Depends(get_current_user)):
     try:
@@ -203,22 +225,36 @@ async def get_categories(current_user: dict = Depends(get_current_user)):
         print("Error en get_categories endpoint:", e)
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
-# Obtener resumen de procesos
-@requests_router.get("/api/manager/process/summary")
 
-
-# Obtener todos los funcionarios
-@requests_router.get("/api/manager/officer/all", response_model=UserListOut)
-async def get_all_employees(current_user: dict = Depends(get_current_user))
+@requests_router.get("/api/manager/process/summary", response_model=RequestSummaryOut)
+async def get_requests_summary(current_user: dict = Depends(get_current_user)):
     try:
-        if current_user.get("role") not in ["SUPERVISOR", "USER"]:
+        if current_user.get("role") not in ["SUPERVISOR"]:
             raise HTTPException(status_code=403, detail="Acceso no autorizado")
 
-    return get_all_employee()
+        return await get_request_summary()
 
     except HTTPException:
         raise
     except Exception as e:
         print("Error en get_categories endpoint:", e)
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
+
+@requests_router.get("/api/manager/officer/all", response_model=UserListOut)
+async def get_all_employees(current_user: dict = Depends(get_current_user)):
+    try:
+        if current_user.get("role") not in ["SUPERVISOR", "USER"]:
+            raise HTTPException(status_code=403, detail="Acceso no autorizado")
+
+        result = await get_all_employees_from_db()
+        print(result)
+        return result
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        print("Error en el endpoint:", e)
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 

@@ -141,3 +141,12 @@ async def logout():
     except Exception as e:
         print("Error during logout:", e)
         raise HTTPException(status_code=500, detail="Logout failed")
+    
+
+@router.delete("/employee/{user_id}", status_code=200)
+async def delete_employee_endpoint(user_id: str):
+    try:
+        result = user_db.delete_employee(user_id)
+        return result
+    except HTTPException as e:
+        raise e

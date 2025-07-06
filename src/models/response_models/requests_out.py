@@ -1,5 +1,5 @@
 from pydantic import BaseModel, field_validator
-from typing import List, Any
+from typing import List, Any, Optional
 from pydantic import BaseModel
 from datetime import date, datetime
 
@@ -36,11 +36,15 @@ class adminRequestOut(BaseModel):
     rut: str
     email: str
     name: str
-    category: str
-    status: str
-    start_date: date
-    end_date: date
+    category: Optional[str] = None
+    status: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
 
+    class Config:
+        json_encoders = {
+            date: lambda v: v.isoformat()
+        }
 class GetRequestsOut(BaseModel):
     status: bool
     message: str

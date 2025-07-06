@@ -12,3 +12,8 @@ class UserSave(BaseModel):
     email: str
     password: str
     signature: str
+
+class UserCreateRequest(BaseModel):
+    full_name: str
+    rut: str
+    email: str

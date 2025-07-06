@@ -1,12 +1,13 @@
+from src.models.response_models.request_summary_out import RequestCategorySummary, RequestSummary, RequestSummaryDataOut, RequestSummaryOut
 from ..database import request_database
 from ..database import user_database
 from src.models.response_models.requests_out import GetRequestsOut, RequestItem,ObjectRequestOut
 from datetime import datetime
 from typing import Optional
-from src.models.response_models import user_list_out
+from src.models.response_models.user_list_out import UserListDataOut, UserListDataWrapper, UserListOut
 
 def get_current_timestamp() -> str:
-    return datetime.now().isoformat()
+    return datetime.now().isoformat(timespec='minutes')
 
 async def get_all_requests(email: str) -> GetRequestsOut:
     raw_data = request_database.fetch_all_requests()
@@ -92,11 +93,17 @@ async def evaluate_request(request_id: int, new_status: str) -> ObjectRequestOut
 
     return ObjectRequestOut(message="Estado actualizado correctamente")
 
-async def get_all_employee() -> UserListOut:
+async def get_all_employees_from_db() -> UserListOut:
     raw_data = user_database.get_all_employee()
     result = []
     if not raw_data:
-        return UserListOut(status=false,message="Error en resolver la solicitud",timestamp=get_current_timestamp(),data = [])
+        return UserListOut(
+    status=False,
+    message="Error en resolver la solicitud",
+    timestamp=get_current_timestamp(),
+    data=UserListDataWrapper(users=[])
+)
+
 
     for item in raw_data:
         result.append(UserListDataOut(id=item.get("id"),
@@ -106,4 +113,47 @@ async def get_all_employee() -> UserListOut:
             )
         )
 
-    return UserListOut(status=true,message="Solicitud aceptada",timestamp=get_current_timestamp(),data=result)
+    return UserListOut(
+    status=True,
+    message="Solicitud aceptada",
+    timestamp=get_current_timestamp(),
+    data=UserListDataWrapper(users=result)
+)
+
+
+async def get_request_summary() -> RequestSummaryOut:
+    raw_data = request_database.get_all_request()
+    categories = request_database.get_categories_from_db()
+    result = []
+    totalRes = 0
+    totalPen = 0
+    totalObj = 0
+    totalPro = 0
+    if not raw_data:
+        return RequestSummaryOut(status=False, message="Error en resolver la solicitud", timestamp=get_current_timestamp(), data=[])
+
+    for item in raw_data:
+        totalPro += 1
+        if item.get("state_id") == 3:
+            totalRes += 1
+        elif item.get("state_id") == 1:
+            totalPen += 1
+        elif item.get("state_id") == 2:
+            totalObj += 1
+
+    for category in categories:
+        category_name = category.get("category_name")
+        count_total = 0
+        for item in raw_data:
+            if item.get("category_id") == category.get("id"):
+                count_total += 1
+        result.append(RequestCategorySummary(
+            name=category_name, total=count_total))
+
+    request_summary = RequestSummary(
+        totalResueltos=totalRes, totalPendientes=totalPen, totalObjeciones=totalObj, totalProcesos=totalPro)
+
+    data_final = RequestSummaryDataOut(
+        request=request_summary, categorySumers=result)
+
+    return RequestSummaryOut(status=True, message="Solicitud aceptada", timestamp=get_current_timestamp(), data=data_final)
