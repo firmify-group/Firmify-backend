@@ -52,3 +52,12 @@ def get_name(email: str):
         return name[0]["name"]
     else:
         raise HTTPException(status_code=404, detail="Name not found for the given email")
+
+def change_signature(id: int, signature: str):
+    id = super_client.table("user").select("id").eq("id", id).execute()
+    
+    if id:
+       return super_client.table("user").update({"signature"}: signature}).eq("id, id).execute() 
+    else:
+        raise HTTPException(status_code=404, detail="Name not found for the given email")
+        
